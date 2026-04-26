@@ -1,0 +1,13 @@
+{
+  "type": "sofias_ordainment:screech",
+  "cooldown": 50,
+  "hud_render": {
+    "should_render": true,
+    "bar_index": 0
+  },
+  "key": {
+    "key": "key.origins.primary_active"
+  },
+  "name": "Sculk Screech",
+  "description": "Release a sonic screech that knocks back enemies or knocks yourself back if no player is hit.\n Costs 5 levels to use."
+}

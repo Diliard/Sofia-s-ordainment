@@ -1,0 +1,17 @@
+{
+  "powers": [
+    "sofias_ordainment:sculked_precision",
+    "sofias_ordainment:sculked_sight",
+    "sofias_ordainment:soul_stain",
+    "sofias_ordainment:succulence",
+    "sofias_ordainment:soul_conversion",
+    "sofias_ordainment:grounding",
+    "sofias_ordainment:screech"
+  ],
+  "icon": "minecraft:sculk",
+  "order": 10,
+  "impact": 3,
+  "name": "Warden",
+  "description": "A soul lost inside the corruption of the cancer that is the sculk.",
+  "layer": "origins:origin"
+}

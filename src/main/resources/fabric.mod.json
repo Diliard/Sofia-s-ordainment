@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "sofias_ordainment",
+  "version": "${version}",
+  "accessWidener": "sofias_ordainment.accesswidener",
+  "name": "sofias_ordainment",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/sofias_ordainment/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "de.sofia.sofias_ordainment.client.Sofias_ordainmentDataGenerator"
+    ],
+    "client": [
+      "de.sofia.sofias_ordainment.client.Sofias_ordainmentClient"
+    ],
+    "main": [
+      "de.sofia.sofias_ordainment.Sofias_ordainment"
+    ]
+  },
+  "mixins": [
+    "sofias_ordainment.mixins.json",
+    {
+      "config": "sofias_ordainment.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

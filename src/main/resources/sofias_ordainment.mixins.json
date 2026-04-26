@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "de.sofia.sofias_ordainment.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "DisableCritMixin",
+    "EntityGetMoveEffectInvoker",
+    "onHitPowerMixin",
+    "PermSculkedEffectMixin",
+    "SculkSensorVibrationCallbackMixin",
+    "SculkifiedDamageMixin",
+    "SculkifiedSizeDeathMixin",
+    "SculkifiedTickingHelperMixin",
+    "SoulConversionInventoryMixin",
+    "SoulConversionMendingMixin",
+    "SoulConversionMixin",
+    "SoulStainHealthRegenCrippleMixin",
+    "StatusEffectInstanceAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  },
+  "client": [
+  ]
+}

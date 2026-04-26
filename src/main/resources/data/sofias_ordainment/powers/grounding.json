@@ -1,0 +1,13 @@
+{
+  "type": "sofias_ordainment:grounding",
+  "cooldown": 150,
+  "hud_render": {
+    "should_render": true,
+    "bar_index": 1
+  },
+  "key": {
+    "key": "key.origins.secondary_active"
+  },
+  "name": "Sculk Grounding",
+  "description": "Release a roar that anchors 'Sculkified' players within 25 blocks,\n costs 10 levels to use."
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "sofias_ordainment:item/pure_sculk_potion"
+  }
+}

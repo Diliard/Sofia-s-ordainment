@@ -1,0 +1,5 @@
+{
+  "type": "sofias_ordainment:sculked_sight",
+  "name": "Sculked Sight",
+  "description": "You may only see players who made noise recently, triggered a sculk sensor, or are Sculkified."
+}
