@@ -1,0 +1,5 @@
+{
+  "type": "sofias_ordainment:pestilence",
+  "name": "Long Live Pestilence",
+  "description": "Ranged hits have a 40% chance and melee hits have a 20% chance to inflict Poison I for 3 seconds."
+}

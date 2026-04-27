@@ -1,0 +1,5 @@
+{
+  "type": "sofias_ordainment:bulky_exoskeleton",
+  "name": "Bulky Exoskeleton",
+  "description": "Take 50% less damage above half health, but 50% more damage below half health."
+}

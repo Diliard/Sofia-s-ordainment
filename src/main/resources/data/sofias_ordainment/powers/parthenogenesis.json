@@ -1,0 +1,13 @@
+{
+  "type": "sofias_ordainment:parthenogenesis",
+  "cooldown": 1200,
+  "hud_render": {
+    "should_render": true,
+    "bar_index": 1
+  },
+  "key": {
+    "key": "key.origins.secondary_active"
+  },
+  "name": "Parthenogenesis",
+  "description": "Summon three 15 health flying cockroach swarms. Their hits deal 1 heart, heal you for 1 heart, and have a 10% chance to inflict Poison I for 3 seconds."
+}

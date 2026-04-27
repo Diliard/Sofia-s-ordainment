@@ -40,6 +40,11 @@ repositories {
     }
 
     maven {
+        name = "Greenhouse Team Maven"
+        url = "https://repo.greenhouse.house/releases/"
+    }
+
+    maven {
         name = "Ladysnake Mods"
         url = 'https://maven.ladysnake.org/releases'
     }
@@ -87,6 +92,7 @@ dependencies {
     modImplementation "com.github.apace100:origins-fabric:v1.10.0"
     modApi "com.github.apace100:apoli:v2.9.0"
     modApi "com.github.apace100:calio:v1.11.0"
+    modImplementation "net.merchantpug:Apugli:${project.apugli_version}-fabric"
 
     modImplementation include("maven.modrinth:AdditionalEntityAttributes:1.7.6+1.20.1")
     //implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"

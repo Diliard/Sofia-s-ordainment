@@ -1,0 +1,5 @@
+{
+  "type": "sofias_ordainment:soap_weakness",
+  "name": "Soap Weakness",
+  "description": "Attackers deal 30% more damage while holding any item whose registry id contains soap."
+}

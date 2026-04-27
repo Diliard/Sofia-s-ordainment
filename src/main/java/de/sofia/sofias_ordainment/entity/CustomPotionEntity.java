@@ -1,4 +1,4 @@
-package de.sofia.sofias_ordainment.entities;
+package de.sofia.sofias_ordainment.entity;
 
 import de.sofia.sofias_ordainment.RegistryHelper;
 import de.sofia.sofias_ordainment.StateSaverAndLoader;

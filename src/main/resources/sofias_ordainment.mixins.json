@@ -8,15 +8,16 @@
     "EntityGetMoveEffectInvoker",
     "onHitPowerMixin",
     "PermSculkedEffectMixin",
-    "SculkSensorVibrationCallbackMixin",
     "SculkifiedDamageMixin",
     "SculkifiedSizeDeathMixin",
     "SculkifiedTickingHelperMixin",
+    "SculkSensorVibrationCallbackMixin",
     "SoulConversionInventoryMixin",
     "SoulConversionMendingMixin",
     "SoulConversionMixin",
     "SoulStainHealthRegenCrippleMixin",
-    "StatusEffectInstanceAccessor"
+    "StatusEffectInstanceAccessor",
+    "SwarmBatEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

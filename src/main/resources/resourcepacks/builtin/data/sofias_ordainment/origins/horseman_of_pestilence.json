@@ -1,0 +1,21 @@
+{
+  "powers": [
+    "sofias_ordainment:infectious_lunge",
+    "sofias_ordainment:parthenogenesis",
+    "sofias_ordainment:bottom_feeder",
+    "sofias_ordainment:shed_exoskeleton",
+    "sofias_ordainment:pestilence",
+    "sofias_ordainment:bulky_exoskeleton",
+    "sofias_ordainment:low_health_swiftness",
+    "sofias_ordainment:cannot_swim",
+    "sofias_ordainment:fast_drowning",
+    "sofias_ordainment:fire_sensitivity",
+    "sofias_ordainment:soap_weakness"
+  ],
+  "icon": "minecraft:rotten_flesh",
+  "order": 11,
+  "impact": 3,
+  "name": "Horseman of Pestilence",
+  "description": "I DONT WANNA BE BATHEDDD NOOOOOOOOOOOOO PLEASEEE I DONT WANNA SHOWER WAHHHHHW WAHHHHH WAHHHH",
+  "layer": "origins:origin"
+}

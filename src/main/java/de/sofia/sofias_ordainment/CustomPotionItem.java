@@ -1,6 +1,6 @@
 package de.sofia.sofias_ordainment;
 
-import de.sofia.sofias_ordainment.entities.CustomPotionEntity;
+import de.sofia.sofias_ordainment.entity.CustomPotionEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

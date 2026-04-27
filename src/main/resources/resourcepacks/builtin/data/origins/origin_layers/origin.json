@@ -1,6 +1,7 @@
 {
   "replace": false,
   "origins": [
-    "sofias_ordainment:warden"
+    "sofias_ordainment:warden",
+    "sofias_ordainment:horseman_of_pestilence"
   ]
 }

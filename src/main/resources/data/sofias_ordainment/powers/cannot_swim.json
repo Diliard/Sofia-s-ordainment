@@ -1,0 +1,5 @@
+{
+  "type": "sofias_ordainment:cannot_swim",
+  "name": "Cannot Swim",
+  "description": "Water drags you downward and prevents swimming."
+}

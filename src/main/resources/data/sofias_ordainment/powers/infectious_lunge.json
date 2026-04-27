@@ -1,0 +1,13 @@
+{
+  "type": "sofias_ordainment:infectious_lunge",
+  "cooldown": 300,
+  "hud_render": {
+    "should_render": true,
+    "bar_index": 0
+  },
+  "key": {
+    "key": "key.origins.primary_active"
+  },
+  "name": "Infectious Lunge",
+  "description": "Charge forward. On hit, deal 4 hearts and inflict Poison II and Blindness for 5 seconds. Missing applies Slowness I for 5 seconds and halves the cooldown."
+}
