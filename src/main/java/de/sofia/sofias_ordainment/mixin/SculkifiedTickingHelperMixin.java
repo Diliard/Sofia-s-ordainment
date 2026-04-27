@@ -55,7 +55,6 @@ public abstract class SculkifiedTickingHelperMixin {
 
         if (getEffectType() == RegistryHelper.SCULKIFIED) {
             if (getAmplifier() != 0) {
-                StatusEffectInstanceAccessor accessor = (StatusEffectInstanceAccessor) this;
                 if (getDuration() <= 1) {
                     StatusEffectInstance statusEffectInstance = new StatusEffectInstance(
                             RegistryHelper.SCULKIFIED,
