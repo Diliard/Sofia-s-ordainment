@@ -8,9 +8,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface StatusEffectInstanceAccessor {
 
     @Accessor("duration")
-    int getDuration();
-
-    @Accessor("duration")
     void setDuration(int duration);
 }
 
