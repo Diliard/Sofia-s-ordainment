@@ -26,6 +26,12 @@ public abstract class SculkifiedGlowRendererMixin {
             0x37206C,
             0x6F3FA8
     };
+    private static final int[] LOW_STACK_GLOW_COLORS = {
+            0x99EEFF,
+            0x55DDEE,
+            0x11BBDD,
+            0x008899
+    };
 
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
     private void sofias_ordainment$renderLocalSculkifiedGlow(CallbackInfoReturnable<Boolean> cir) {
@@ -81,17 +87,15 @@ public abstract class SculkifiedGlowRendererMixin {
 
     private int sofias_ordainment$getSculkGlowColor(Entity entity, int level) {
         if (level < 5) {
-            float progress = (level - 1) / 3.0F;
-            return sofias_ordainment$lerpColor(0x9AEFFF, 0x16B9C8, progress);
+            return LOW_STACK_GLOW_COLORS[Math.max(0, level - 1)];
         }
 
         long time = MinecraftClient.getInstance().world == null ? entity.age : MinecraftClient.getInstance().world.getTime();
-        int speed = Math.max(2, 11 - level);
-        int index = (int) ((time / speed) % SCULK_GLOW_COLORS.length);
-        int nextIndex = (index + 1) % SCULK_GLOW_COLORS.length;
-        float progress = (time % speed) / (float) speed;
+        int speed = Math.max(3, 13 - level);
+        int entityOffset = Math.floorMod(entity.getId(), SCULK_GLOW_COLORS.length);
+        int index = (int) (((time / speed) + entityOffset) % SCULK_GLOW_COLORS.length);
 
-        return sofias_ordainment$lerpColor(SCULK_GLOW_COLORS[index], SCULK_GLOW_COLORS[nextIndex], progress);
+        return SCULK_GLOW_COLORS[index];
     }
 
     private int sofias_ordainment$applyWeakHealthColor(LivingEntity living, int color) {
@@ -102,18 +106,34 @@ public abstract class SculkifiedGlowRendererMixin {
         float weakness = Math.max(0.0F, Math.min(1.0F, (0.45F - healthRatio) / 0.45F));
         if (weakness <= 0.0F) return color;
 
-        int weakenedColor = sofias_ordainment$lerpColor(color, 0xD9FFF7, weakness * 0.65F);
+        int healthStep = Math.min(3, (int) (weakness * 4.0F));
+        int weakenedColor = switch (healthStep) {
+            case 1 -> sofias_ordainment$mixQuarter(color, 0xCCFFF7, 1);
+            case 2 -> sofias_ordainment$mixQuarter(color, 0xDDFFF7, 2);
+            case 3 -> sofias_ordainment$mixQuarter(color, 0xEEFFF7, 3);
+            default -> color;
+        };
         if (healthRatio > 0.2F) return weakenedColor;
 
         long time = MinecraftClient.getInstance().world == null ? living.age : MinecraftClient.getInstance().world.getTime();
-        float flicker = ((time / 3) % 2 == 0) ? 0.35F : 0.0F;
-        return sofias_ordainment$lerpColor(weakenedColor, 0x082A33, flicker * weakness);
+        return ((time / 4) % 2 == 0)
+                ? sofias_ordainment$mixQuarter(weakenedColor, 0x002233, 1)
+                : weakenedColor;
     }
 
-    private int sofias_ordainment$lerpColor(int start, int end, float progress) {
-        int r = (int) (((start >> 16) & 0xFF) + ((((end >> 16) & 0xFF) - ((start >> 16) & 0xFF)) * progress));
-        int g = (int) (((start >> 8) & 0xFF) + ((((end >> 8) & 0xFF) - ((start >> 8) & 0xFF)) * progress));
-        int b = (int) ((start & 0xFF) + (((end & 0xFF) - (start & 0xFF)) * progress));
+    private int sofias_ordainment$mixQuarter(int start, int end, int quarters) {
+        int inverse = 4 - quarters;
+        int r = ((((start >> 16) & 0xFF) * inverse) + (((end >> 16) & 0xFF) * quarters)) / 4;
+        int g = ((((start >> 8) & 0xFF) * inverse) + (((end >> 8) & 0xFF) * quarters)) / 4;
+        int b = (((start & 0xFF) * inverse) + ((end & 0xFF) * quarters)) / 4;
+
+        return sofias_ordainment$snapColor((r << 16) | (g << 8) | b);
+    }
+
+    private int sofias_ordainment$snapColor(int color) {
+        int r = ((color >> 16) & 0xFF) & 0xF0;
+        int g = ((color >> 8) & 0xFF) & 0xF0;
+        int b = (color & 0xFF) & 0xF0;
 
         return (r << 16) | (g << 8) | b;
     }

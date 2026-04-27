@@ -59,7 +59,10 @@ public abstract class SculkifiedTickingHelperMixin {
                             600,
                             getAmplifier() - 1
                     );
-                    entity.removeStatusEffect(RegistryHelper.SCULKIFIED);
+                    SculkifiedSourceTrackerHelper.suppressRemovalCleanup(
+                            entity,
+                            () -> entity.removeStatusEffect(RegistryHelper.SCULKIFIED)
+                    );
                     entity.addStatusEffect(statusEffectInstance);
                     SculkifiedSourceTrackerHelper.setTargetStackCount(entity, getAmplifier());
                 }

@@ -6,10 +6,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 public class SculkifiedSourceTrackerHelper {
+    private static final Set<LivingEntity> SUPPRESSED_REMOVAL_CLEANUP = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Nullable
     public static Map<LivingEntity, Integer> getSources(LivingEntity target) {
@@ -25,6 +28,19 @@ public class SculkifiedSourceTrackerHelper {
         });
 
         return returnVal;
+    }
+
+    public static void suppressRemovalCleanup(LivingEntity target, Runnable action) {
+        SUPPRESSED_REMOVAL_CLEANUP.add(target);
+        try {
+            action.run();
+        } finally {
+            SUPPRESSED_REMOVAL_CLEANUP.remove(target);
+        }
+    }
+
+    public static boolean isRemovalCleanupSuppressed(LivingEntity target) {
+        return SUPPRESSED_REMOVAL_CLEANUP.contains(target);
     }
 
     public static void removeTarget(LivingEntity target) {

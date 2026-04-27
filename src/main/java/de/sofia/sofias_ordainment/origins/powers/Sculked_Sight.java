@@ -20,8 +20,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Sculked_Sight extends Power {
-    private static final int NOISE_GRACE_TICKS = 60;
+    private static final int NOISE_GRACE_TICKS = 30;
     private static final int NOISE_HISTORY_TICKS = 200;
+    private static final int DISAPPEAR_CUE_TICKS = 24;
     private static final int SENSOR_GLOW_TICKS = 120;
     private static final int SENSOR_CUE_TICKS = 90;
     private static final int SENSOR_HISTORY_TICKS = 180;
@@ -36,7 +37,10 @@ public class Sculked_Sight extends Power {
     private final Object2LongMap<UUID> lastNoiseTicks = new Object2LongOpenHashMap<>();
     private final Object2LongMap<UUID> lastSensorTicks = new Object2LongOpenHashMap<>();
     private final Object2LongMap<UUID> lastSensorCueTicks = new Object2LongOpenHashMap<>();
+    private final Object2LongMap<UUID> lastDisappearCueTicks = new Object2LongOpenHashMap<>();
     private final Map<UUID, Vec3d> sensorPingPositions = new HashMap<>();
+    private final Map<UUID, Vec3d> disappearCuePositions = new HashMap<>();
+    private final Map<UUID, Boolean> hiddenStates = new HashMap<>();
 
     public Sculked_Sight(PowerType<?> type, LivingEntity entity) {
         super(type, entity);
@@ -59,8 +63,20 @@ public class Sculked_Sight extends Power {
 
         if (isSensorHighlighted(target, now)) return false;
 
-        return !lastNoiseTicks.containsKey(targetId)
+        boolean shouldHide = !lastNoiseTicks.containsKey(targetId)
                 || now - lastNoiseTicks.getLong(targetId) > NOISE_GRACE_TICKS;
+        boolean wasHidden = hiddenStates.getOrDefault(targetId, true);
+
+        if (shouldHide && !wasHidden) {
+            lastDisappearCueTicks.put(targetId, now);
+            disappearCuePositions.put(targetId, target.getPos().add(0.0D, target.getHeight() * 0.5D, 0.0D));
+        } else if (!shouldHide) {
+            lastDisappearCueTicks.removeLong(targetId);
+            disappearCuePositions.remove(targetId);
+        }
+
+        hiddenStates.put(targetId, shouldHide);
+        return shouldHide;
     }
 
     public void markNoiseNear(double x, double y, double z, double radius) {
@@ -88,12 +104,10 @@ public class Sculked_Sight extends Power {
         long now = target.getWorld().getTime();
         long lastPing = lastSensorTicks.getLong(target.getUuid());
         long age = now - lastPing;
-        int speed = Math.max(3, 10 - (int) Math.min(age / 12, 6));
-        int index = (int) ((now / speed) % SENSOR_GLOW_COLORS.length);
-        int nextIndex = (index + 1) % SENSOR_GLOW_COLORS.length;
-        float progress = (now % speed) / (float) speed;
+        int speed = Math.max(4, 12 - (int) Math.min(age / 12, 6));
+        int index = (int) (((now / speed) + Math.floorMod(target.getId(), SENSOR_GLOW_COLORS.length)) % SENSOR_GLOW_COLORS.length);
 
-        return lerpColor(SENSOR_GLOW_COLORS[index], SENSOR_GLOW_COLORS[nextIndex], progress);
+        return snapColor(SENSOR_GLOW_COLORS[index]);
     }
 
     public List<SensorPing> getActiveSensorCues(long now) {
@@ -104,6 +118,20 @@ public class Sculked_Sight extends Power {
             Vec3d pos = sensorPingPositions.get(entry.getKey());
             if (pos != null) {
                 pings.add(new SensorPing(entry.getKey(), pos, now - entry.getLongValue(), SENSOR_CUE_TICKS));
+            }
+        });
+
+        return pings;
+    }
+
+    public List<SensorPing> getActiveDisappearCues(long now) {
+        cleanup(now);
+
+        List<SensorPing> pings = new ArrayList<>();
+        lastDisappearCueTicks.object2LongEntrySet().forEach(entry -> {
+            Vec3d pos = disappearCuePositions.get(entry.getKey());
+            if (pos != null) {
+                pings.add(new SensorPing(entry.getKey(), pos, now - entry.getLongValue(), DISAPPEAR_CUE_TICKS));
             }
         });
 
@@ -140,14 +168,21 @@ public class Sculked_Sight extends Power {
                 .removeIf(entry -> now - entry.getLongValue() > SENSOR_HISTORY_TICKS);
         lastSensorCueTicks.object2LongEntrySet()
                 .removeIf(entry -> now - entry.getLongValue() > SENSOR_CUE_TICKS);
+        lastDisappearCueTicks.object2LongEntrySet()
+                .removeIf(entry -> now - entry.getLongValue() > DISAPPEAR_CUE_TICKS);
         sensorPingPositions.keySet().removeIf(targetId ->
                 !lastSensorTicks.containsKey(targetId) && !lastSensorCueTicks.containsKey(targetId));
+        disappearCuePositions.keySet().removeIf(targetId -> !lastDisappearCueTicks.containsKey(targetId));
+        hiddenStates.keySet().removeIf(targetId ->
+                !lastNoiseTicks.containsKey(targetId)
+                        && !lastSensorTicks.containsKey(targetId)
+                        && !lastDisappearCueTicks.containsKey(targetId));
     }
 
-    private int lerpColor(int start, int end, float progress) {
-        int r = (int) (((start >> 16) & 0xFF) + ((((end >> 16) & 0xFF) - ((start >> 16) & 0xFF)) * progress));
-        int g = (int) (((start >> 8) & 0xFF) + ((((end >> 8) & 0xFF) - ((start >> 8) & 0xFF)) * progress));
-        int b = (int) ((start & 0xFF) + (((end & 0xFF) - (start & 0xFF)) * progress));
+    private int snapColor(int color) {
+        int r = ((color >> 16) & 0xFF) & 0xF0;
+        int g = ((color >> 8) & 0xFF) & 0xF0;
+        int b = (color & 0xFF) & 0xF0;
 
         return (r << 16) | (g << 8) | b;
     }

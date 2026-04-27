@@ -60,6 +60,10 @@ public class SculkedSightClientEffects {
 
                 drawCue(context, camera, pos, width, height, ping);
             }
+
+            for (Sculked_Sight.SensorPing ping : power.getActiveDisappearCues(client.world.getTime())) {
+                drawDisappearCue(context, camera, ping.pos(), width, height, ping);
+            }
         }
     }
 
@@ -87,6 +91,25 @@ public class SculkedSightClientEffects {
         context.fill(x - 1, y - 6, x + 1, y + 6, color);
         context.fill(x - 6, y - 1, x + 6, y + 1, color);
         context.fill(x - 2, y - 2, x + 2, y + 2, coreColor);
+    }
+
+    private static void drawDisappearCue(DrawContext context, Camera camera, Vec3d pos, int width, int height, Sculked_Sight.SensorPing ping) {
+        double yawDiff = getYawDiff(camera, pos);
+        double pitchDiff = getPitchDiff(camera, pos);
+        int margin = 24;
+        int centerX = width / 2;
+        int centerY = height / 2;
+
+        int x = centerX + (int) (MathHelper.clamp(yawDiff / 75.0D, -1.0D, 1.0D) * (centerX - margin));
+        int y = centerY + (int) (MathHelper.clamp(pitchDiff / 55.0D, -1.0D, 1.0D) * (centerY - margin));
+        float fade = MathHelper.clamp(1.0F - (ping.age() / (float) ping.maxAge()), 0.0F, 1.0F);
+        int alpha = (int) (fade * 120.0F);
+        int color = (alpha << 24) | 0x0090A0;
+
+        context.fill(x - 5, y - 5, x - 2, y - 2, color);
+        context.fill(x + 2, y - 5, x + 5, y - 2, color);
+        context.fill(x - 5, y + 2, x - 2, y + 5, color);
+        context.fill(x + 2, y + 2, x + 5, y + 5, color);
     }
 
     private static double getYawDiff(Camera camera, Vec3d pos) {
