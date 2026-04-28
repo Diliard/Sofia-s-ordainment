@@ -33,6 +33,21 @@ public class SculkedSightClientEffects {
                 }
         );
 
+        ClientPlayNetworking.registerGlobalReceiver(
+                SculkedSightSensorPackets.VOICE_NOISE,
+                (client, handler, buf, responseSender) -> {
+                    var targetId = buf.readUuid();
+
+                    client.execute(() -> {
+                        ClientPlayerEntity localPlayer = client.player;
+                        if (localPlayer == null) return;
+
+                        PowerHolderComponent.getPowers(localPlayer, Sculked_Sight.class)
+                                .forEach(power -> power.markNoise(targetId));
+                    });
+                }
+        );
+
         HudRenderCallback.EVENT.register(SculkedSightClientEffects::renderSensorCues);
     }
 

@@ -1,5 +1,6 @@
 package de.sofia.sofias_ordainment.origins.powers;
 
+import de.sofia.sofias_ordainment.entity.CockroachSwarmMarked;
 import io.github.apace100.apoli.power.Active;
 import io.github.apace100.apoli.power.CooldownPower;
 import io.github.apace100.apoli.power.PowerType;
@@ -63,6 +64,7 @@ public class ParthenogenesisPower extends CooldownPower implements Active {
             return;
         }
 
+        clearOwnerTarget(entity.getUuid());
         discardSwarmsOwnedBy(world, entity.getUuid());
 
         int spawned = 0;
@@ -128,6 +130,8 @@ public class ParthenogenesisPower extends CooldownPower implements Active {
 
                 ServerPlayerEntity owner = server.getPlayerManager().getPlayer(ownerUuid.get());
                 if (owner == null || owner.isRemoved()) {
+                    clearOwnerTargetForSwarm(swarm);
+                    attackCooldowns.remove(swarm.getUuid());
                     swarm.discard();
                     continue;
                 }
@@ -135,6 +139,7 @@ public class ParthenogenesisPower extends CooldownPower implements Active {
                 swarm.setRoosting(false);
                 swarm.setNoGravity(true);
                 Optional<LivingEntity> target = findTarget(world, owner, swarm);
+                setSwarmHasTarget(swarm, target.isPresent());
                 if (target.isPresent()) {
                     moveToward(swarm, target.get().getEyePos());
                     tryAttack(world, swarm, owner, target.get());
@@ -170,9 +175,26 @@ public class ParthenogenesisPower extends CooldownPower implements Active {
             Optional<UUID> swarmOwnerUuid = getOwnerUuid(entity);
             if (swarmOwnerUuid.isPresent() && swarmOwnerUuid.get().equals(ownerUuid)) {
                 attackCooldowns.remove(entity.getUuid());
+                setSwarmHasTarget(entity, false);
                 entity.discard();
             }
         }
+    }
+
+    public static void clearOwnerTargetForSwarm(Entity swarm) {
+        if (!isSwarm(swarm)) return;
+
+        getOwnerUuid(swarm).ifPresent(ParthenogenesisPower::clearOwnerTarget);
+        attackCooldowns.remove(swarm.getUuid());
+        setSwarmHasTarget(swarm, false);
+    }
+
+    public static void clearOwnerTarget(UUID ownerUuid) {
+        lastOwnerTargets.remove(ownerUuid);
+    }
+
+    public static void clearTargetReferencesTo(UUID targetUuid) {
+        lastOwnerTargets.entrySet().removeIf(entry -> entry.getValue().equals(targetUuid));
     }
 
     private static boolean isSwarm(Entity entity) {
@@ -236,6 +258,12 @@ public class ParthenogenesisPower extends CooldownPower implements Active {
         }
 
         return Optional.of(target);
+    }
+
+    private static void setSwarmHasTarget(Entity swarm, boolean hasTarget) {
+        if (swarm instanceof CockroachSwarmMarked marker) {
+            marker.sofias_ordainment$setCockroachSwarmTarget(hasTarget);
+        }
     }
 
     private static Vec3d getOwnerSlotPos(ServerPlayerEntity owner, BatEntity swarm, int ticks) {

@@ -87,6 +87,13 @@ public class Sculked_Sight extends Power {
                 .forEach(target -> lastNoiseTicks.put(target.getUuid(), now));
     }
 
+    public void markNoise(UUID targetId) {
+        long now = entity.getWorld().getTime();
+
+        lastNoiseTicks.put(targetId, now);
+        cleanup(now);
+    }
+
     public void markSensorPing(UUID targetId, double x, double y, double z) {
         long now = entity.getWorld().getTime();
 

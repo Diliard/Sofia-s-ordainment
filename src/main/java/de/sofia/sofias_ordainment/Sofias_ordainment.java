@@ -1,11 +1,14 @@
 package de.sofia.sofias_ordainment;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import de.sofia.sofias_ordainment.origins.powers.Sculked_Sight;
+import de.sofia.sofias_ordainment.origins.utility.SculkifiedSourceTrackerHelper;
+import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
-import de.sofia.sofias_ordainment.origins.utility.SculkifiedSourceTrackerHelper;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -55,6 +58,44 @@ public class Sofias_ordainment implements ModInitializer {
                             })
                     )
             );
+            dispatcher.register(CommandManager.literal("sculkedSightShriekerRelay")
+                    .executes(context -> toggleSculkedSightShriekerRelay(context.getSource().getPlayer()))
+                    .then(CommandManager.literal("on")
+                            .executes(context -> setSculkedSightShriekerRelay(context.getSource().getPlayer(), true))
+                    )
+                    .then(CommandManager.literal("off")
+                            .executes(context -> setSculkedSightShriekerRelay(context.getSource().getPlayer(), false))
+                    )
+                    .then(CommandManager.argument("enabled", BoolArgumentType.bool())
+                            .executes(context -> setSculkedSightShriekerRelay(
+                                    context.getSource().getPlayer(),
+                                    BoolArgumentType.getBool(context, "enabled")
+                            ))
+                    )
+            );
         });
+    }
+
+    private int toggleSculkedSightShriekerRelay(ServerPlayerEntity player) {
+        StateSaverAndLoader state = StateSaverAndLoader.getServerState(player.getServer());
+        boolean enabled = state.isSculkedSightShriekerRelayDisabled(player.getUuid());
+
+        return setSculkedSightShriekerRelay(player, enabled);
+    }
+
+    private int setSculkedSightShriekerRelay(ServerPlayerEntity player, boolean enabled) {
+        if (!PowerHolderComponent.hasPower(player, Sculked_Sight.class)) {
+            player.sendMessage(Text.literal("You may only use this while you have Sculked Sight."));
+            return 0;
+        }
+
+        StateSaverAndLoader state = StateSaverAndLoader.getServerState(player.getServer());
+        state.setSculkedSightShriekerRelayDisabled(player.getUuid(), !enabled);
+
+        String status = enabled ? "enabled" : "disabled";
+        Text message = Text.literal("Sculked Sight shrieker voice relay " + status + ".");
+
+        player.sendMessage(message, false);
+        return 1;
     }
 }

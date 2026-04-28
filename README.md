@@ -8,3 +8,7 @@ https://apugli.readthedocs.io/en/latest/types/power_types/
 https://moborigins.ultrusmods.me/en/latest/
 
 https://github.com/MoriyaShiine/extra-origins/wiki
+
+Credit:
+
+https://github.com/AlexModGuy/AlexsMobs - Cockroach model

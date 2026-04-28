@@ -19,6 +19,9 @@
     ],
     "main": [
       "de.sofia.sofias_ordainment.Sofias_ordainment"
+    ],
+    "voicechat": [
+      "de.sofia.sofias_ordainment.voice.SculkedSightVoicechatPlugin"
     ]
   },
   "mixins": [
@@ -39,5 +42,8 @@
     "cardinal-components-base": "*",
     "cardinal-components-entity": "*",
     "pehkui": ">=3.7.8"
+  },
+  "suggests": {
+    "voicechat": "*"
   }
 }

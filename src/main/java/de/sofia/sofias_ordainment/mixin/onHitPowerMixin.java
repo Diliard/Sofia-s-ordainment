@@ -8,6 +8,7 @@ import net.minecraft.entity.damage.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -49,5 +50,14 @@ public abstract class onHitPowerMixin {
         LivingEntity target = (LivingEntity)(Object)this;
         PowerHolderComponent.getPowers(attacker, ParthenogenesisPower.class)
                 .forEach(power -> power.rememberOwnerHit(target));
+    }
+
+    @Inject(method = "onDeath", at = @At("HEAD"))
+    private void sofias_ordainment$clearParthenogenesisTargetOnSwarmDeath(DamageSource source, CallbackInfo ci) {
+        LivingEntity deadEntity = (LivingEntity) (Object) this;
+
+        ParthenogenesisPower.clearOwnerTargetForSwarm(deadEntity);
+        ParthenogenesisPower.clearOwnerTarget(deadEntity.getUuid());
+        ParthenogenesisPower.clearTargetReferencesTo(deadEntity.getUuid());
     }
 }

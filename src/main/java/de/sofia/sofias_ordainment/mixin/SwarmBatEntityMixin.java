@@ -21,11 +21,16 @@ public abstract class SwarmBatEntityMixin implements CockroachSwarmMarked {
     private static final TrackedData<Boolean> SOFIAS_COCKROACH_SWARM =
             DataTracker.registerData(BatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
+    @Unique
+    private static final TrackedData<Boolean> SOFIAS_COCKROACH_SWARM_HAS_TARGET =
+            DataTracker.registerData(BatEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+
     @Inject(method = "initDataTracker", at = @At("TAIL"))
     private void sofias_ordainment$initDataTracker(CallbackInfo ci) {
         BatEntity self = (BatEntity) (Object) this;
 
         self.getDataTracker().startTracking(SOFIAS_COCKROACH_SWARM, false);
+        self.getDataTracker().startTracking(SOFIAS_COCKROACH_SWARM_HAS_TARGET, false);
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
@@ -51,5 +56,17 @@ public abstract class SwarmBatEntityMixin implements CockroachSwarmMarked {
     public void sofias_ordainment$setCockroachSwarm(boolean value) {
         BatEntity self = (BatEntity) (Object) this;
         self.getDataTracker().set(SOFIAS_COCKROACH_SWARM, value);
+    }
+
+    @Override
+    public boolean sofias_ordainment$hasCockroachSwarmTarget() {
+        BatEntity self = (BatEntity) (Object) this;
+        return self.getDataTracker().get(SOFIAS_COCKROACH_SWARM_HAS_TARGET);
+    }
+
+    @Override
+    public void sofias_ordainment$setCockroachSwarmTarget(boolean value) {
+        BatEntity self = (BatEntity) (Object) this;
+        self.getDataTracker().set(SOFIAS_COCKROACH_SWARM_HAS_TARGET, value);
     }
 }
