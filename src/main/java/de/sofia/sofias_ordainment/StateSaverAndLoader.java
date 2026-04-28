@@ -16,35 +16,44 @@ import java.util.UUID;
 
 public class StateSaverAndLoader extends PersistentState {
     public List<UUID> permSculked = new ArrayList<>();
-    public List<UUID> sculkedSightShriekerRelayDisabled = new ArrayList<>();
+    public List<UUID> sculkedSightSensorRelayDisabled = new ArrayList<>();
 
     private StateSaverAndLoader() {
     }
 
-    private StateSaverAndLoader(List<UUID> permSculked, List<UUID> sculkedSightShriekerRelayDisabled) {
+    private StateSaverAndLoader(List<UUID> permSculked, List<UUID> sculkedSightSensorRelayDisabled, List<UUID> legacyShriekerRelayDisabled) {
         this.permSculked = new ArrayList<>(permSculked);
-        this.sculkedSightShriekerRelayDisabled = new ArrayList<>(sculkedSightShriekerRelayDisabled);
+        this.sculkedSightSensorRelayDisabled = new ArrayList<>(sculkedSightSensorRelayDisabled);
+        for (UUID playerId : legacyShriekerRelayDisabled) {
+            if (!this.sculkedSightSensorRelayDisabled.contains(playerId)) {
+                this.sculkedSightSensorRelayDisabled.add(playerId);
+            }
+        }
     }
 
     private List<UUID> getPermSculked() {
         return permSculked;
     }
 
-    private List<UUID> getSculkedSightShriekerRelayDisabled() {
-        return sculkedSightShriekerRelayDisabled;
+    private List<UUID> getSculkedSightSensorRelayDisabled() {
+        return sculkedSightSensorRelayDisabled;
     }
 
-    public boolean isSculkedSightShriekerRelayDisabled(UUID playerId) {
-        return sculkedSightShriekerRelayDisabled.contains(playerId);
+    private List<UUID> getLegacyShriekerRelayDisabled() {
+        return List.of();
     }
 
-    public void setSculkedSightShriekerRelayDisabled(UUID playerId, boolean disabled) {
+    public boolean isSculkedSightSensorRelayDisabled(UUID playerId) {
+        return sculkedSightSensorRelayDisabled.contains(playerId);
+    }
+
+    public void setSculkedSightSensorRelayDisabled(UUID playerId, boolean disabled) {
         if (disabled) {
-            if (!sculkedSightShriekerRelayDisabled.contains(playerId)) {
-                sculkedSightShriekerRelayDisabled.add(playerId);
+            if (!sculkedSightSensorRelayDisabled.contains(playerId)) {
+                sculkedSightSensorRelayDisabled.add(playerId);
                 markDirty();
             }
-        } else if (sculkedSightShriekerRelayDisabled.remove(playerId)) {
+        } else if (sculkedSightSensorRelayDisabled.remove(playerId)) {
             markDirty();
         }
     }
@@ -52,7 +61,8 @@ public class StateSaverAndLoader extends PersistentState {
     private static final Codec<StateSaverAndLoader> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
                 Uuids.CODEC.listOf().fieldOf("permSculked").forGetter(StateSaverAndLoader::getPermSculked),
-                Uuids.CODEC.listOf().optionalFieldOf("sculkedSightShriekerRelayDisabled", List.of()).forGetter(StateSaverAndLoader::getSculkedSightShriekerRelayDisabled)
+                Uuids.CODEC.listOf().optionalFieldOf("sculkedSightSensorRelayDisabled", List.of()).forGetter(StateSaverAndLoader::getSculkedSightSensorRelayDisabled),
+                Uuids.CODEC.listOf().optionalFieldOf("sculkedSightShriekerRelayDisabled", List.of()).forGetter(StateSaverAndLoader::getLegacyShriekerRelayDisabled)
         ).apply(instance, StateSaverAndLoader::new)
     );
 

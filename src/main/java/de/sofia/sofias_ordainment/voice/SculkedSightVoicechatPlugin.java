@@ -28,16 +28,16 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
-    private static final int SHRIEKER_RADIUS_BLOCKS = 8;
-    private static final int SHRIEKER_CHECK_INTERVAL_TICKS = 10;
+    private static final int SENSOR_RADIUS_BLOCKS = 8;
+    private static final int SENSOR_CHECK_INTERVAL_TICKS = 10;
     private static final long DIRECT_VISIBILITY_INTERVAL_MS = 400L;
-    private static final long SHRIEKER_VISIBILITY_INTERVAL_MS = 600L;
+    private static final long SENSOR_VISIBILITY_INTERVAL_MS = 600L;
     private static final long THROTTLE_ENTRY_TTL_MS = 10_000L;
     private static final int EVENT_PRIORITY = -1_000;
 
     private final Map<VisibilityKey, Long> directVisibilityPings = new ConcurrentHashMap<>();
-    private final Map<VisibilityKey, Long> shriekerVisibilityPings = new ConcurrentHashMap<>();
-    private final Map<UUID, ShriekerCheck> shriekerChecks = new ConcurrentHashMap<>();
+    private final Map<VisibilityKey, Long> sensorVisibilityPings = new ConcurrentHashMap<>();
+    private final Map<UUID, SensorCheck> sensorChecks = new ConcurrentHashMap<>();
     private final Map<UUID, UUID> relayChannels = new ConcurrentHashMap<>();
     private VoicechatServerApi voicechatApi;
 
@@ -90,17 +90,17 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
         if (server == null) return;
 
         MicrophonePacket packet = event.getPacket();
-        server.execute(() -> handleShriekerVoice(serverApi, senderConnection, speaker, packet));
+        server.execute(() -> handleSensorVoice(serverApi, senderConnection, speaker, packet));
     }
 
-    private void handleShriekerVoice(
+    private void handleSensorVoice(
             VoicechatServerApi serverApi,
             VoicechatConnection senderConnection,
             ServerPlayerEntity speaker,
             MicrophonePacket packet
     ) {
-        BlockPos shriekerPos = getNearbyShrieker(speaker);
-        if (shriekerPos == null) return;
+        BlockPos sensorPos = getNearbySensor(speaker);
+        if (sensorPos == null) return;
 
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(speaker.getServer());
         for (ServerPlayerEntity viewer : speaker.getServer().getPlayerManager().getPlayerList()) {
@@ -108,13 +108,13 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
             if (viewer.getWorld() != speaker.getWorld()) continue;
             if (!PowerHolderComponent.hasPower(viewer, Sculked_Sight.class)) continue;
 
-            if (shouldSend(shriekerVisibilityPings, new VisibilityKey(viewer.getUuid(), speaker.getUuid()), SHRIEKER_VISIBILITY_INTERVAL_MS)) {
+            if (shouldSend(sensorVisibilityPings, new VisibilityKey(viewer.getUuid(), speaker.getUuid()), SENSOR_VISIBILITY_INTERVAL_MS)) {
                 SculkedSightSensorPackets.sendSensorPing(viewer, speaker);
             }
 
             VoicechatConnection viewerConnection = serverApi.getConnectionOf(viewer.getUuid());
-            if (state.isSculkedSightShriekerRelayDisabled(viewer.getUuid())) continue;
-            if (!shouldRelayShriekerAudio(serverApi, senderConnection, viewerConnection, speaker, viewer, packet)) {
+            if (state.isSculkedSightSensorRelayDisabled(viewer.getUuid())) continue;
+            if (!shouldRelaySensorAudio(serverApi, senderConnection, viewerConnection, speaker, viewer, packet)) {
                 continue;
             }
 
@@ -125,7 +125,7 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
         }
     }
 
-    private boolean shouldRelayShriekerAudio(
+    private boolean shouldRelaySensorAudio(
             VoicechatServerApi serverApi,
             VoicechatConnection senderConnection,
             VoicechatConnection viewerConnection,
@@ -144,28 +144,29 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
         return viewer.squaredDistanceTo(speaker) > directDistance * directDistance;
     }
 
-    private BlockPos getNearbyShrieker(ServerPlayerEntity speaker) {
+    private BlockPos getNearbySensor(ServerPlayerEntity speaker) {
         ServerWorld world = speaker.getServerWorld();
         long now = world.getTime();
-        ShriekerCheck cached = shriekerChecks.get(speaker.getUuid());
-        if (cached != null && now - cached.checkedAtTick() <= SHRIEKER_CHECK_INTERVAL_TICKS) {
+        SensorCheck cached = sensorChecks.get(speaker.getUuid());
+        if (cached != null && now - cached.checkedAtTick() <= SENSOR_CHECK_INTERVAL_TICKS) {
             return cached.pos();
         }
 
-        BlockPos pos = findNearestShrieker(speaker, world);
-        shriekerChecks.put(speaker.getUuid(), new ShriekerCheck(now, pos));
+        BlockPos pos = findNearestSensor(speaker, world);
+        sensorChecks.put(speaker.getUuid(), new SensorCheck(now, pos));
         return pos;
     }
 
-    private BlockPos findNearestShrieker(ServerPlayerEntity speaker, ServerWorld world) {
+    private BlockPos findNearestSensor(ServerPlayerEntity speaker, ServerWorld world) {
         BlockPos center = speaker.getBlockPos();
-        int radius = SHRIEKER_RADIUS_BLOCKS;
+        int radius = SENSOR_RADIUS_BLOCKS;
         double maxDistanceSquared = radius * radius;
         double nearestDistanceSquared = maxDistanceSquared + 1.0D;
         BlockPos nearest = null;
 
         for (BlockPos pos : BlockPos.iterate(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))) {
-            if (!world.getBlockState(pos).isOf(Blocks.SCULK_SHRIEKER)) continue;
+            if (!world.getBlockState(pos).isOf(Blocks.SCULK_SENSOR)
+                    && !world.getBlockState(pos).isOf(Blocks.CALIBRATED_SCULK_SENSOR)) continue;
 
             double distanceSquared = squaredDistanceToCenter(pos, speaker);
             if (distanceSquared > maxDistanceSquared || distanceSquared >= nearestDistanceSquared) continue;
@@ -203,7 +204,7 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
 
     private UUID getRelayChannelId(UUID speakerId) {
         return relayChannels.computeIfAbsent(speakerId, id -> UUID.nameUUIDFromBytes(
-                (Sofias_ordainment.MOD_ID + ":shrieker_voice_relay:" + id).getBytes(StandardCharsets.UTF_8)
+                (Sofias_ordainment.MOD_ID + ":sensor_voice_relay:" + id).getBytes(StandardCharsets.UTF_8)
         ));
     }
 
@@ -227,6 +228,6 @@ public class SculkedSightVoicechatPlugin implements VoicechatPlugin {
     private record VisibilityKey(UUID viewerId, UUID targetId) {
     }
 
-    private record ShriekerCheck(long checkedAtTick, BlockPos pos) {
+    private record SensorCheck(long checkedAtTick, BlockPos pos) {
     }
 }

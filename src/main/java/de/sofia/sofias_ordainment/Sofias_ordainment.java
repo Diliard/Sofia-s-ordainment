@@ -58,16 +58,31 @@ public class Sofias_ordainment implements ModInitializer {
                             })
                     )
             );
-            dispatcher.register(CommandManager.literal("sculkedSightShriekerRelay")
-                    .executes(context -> toggleSculkedSightShriekerRelay(context.getSource().getPlayer()))
+            dispatcher.register(CommandManager.literal("sculkedSightSensorRelay")
+                    .executes(context -> toggleSculkedSightSensorRelay(context.getSource().getPlayer()))
                     .then(CommandManager.literal("on")
-                            .executes(context -> setSculkedSightShriekerRelay(context.getSource().getPlayer(), true))
+                            .executes(context -> setSculkedSightSensorRelay(context.getSource().getPlayer(), true))
                     )
                     .then(CommandManager.literal("off")
-                            .executes(context -> setSculkedSightShriekerRelay(context.getSource().getPlayer(), false))
+                            .executes(context -> setSculkedSightSensorRelay(context.getSource().getPlayer(), false))
                     )
                     .then(CommandManager.argument("enabled", BoolArgumentType.bool())
-                            .executes(context -> setSculkedSightShriekerRelay(
+                            .executes(context -> setSculkedSightSensorRelay(
+                                    context.getSource().getPlayer(),
+                                    BoolArgumentType.getBool(context, "enabled")
+                            ))
+                    )
+            );
+            dispatcher.register(CommandManager.literal("sculkedSightShriekerRelay")
+                    .executes(context -> toggleSculkedSightSensorRelay(context.getSource().getPlayer()))
+                    .then(CommandManager.literal("on")
+                            .executes(context -> setSculkedSightSensorRelay(context.getSource().getPlayer(), true))
+                    )
+                    .then(CommandManager.literal("off")
+                            .executes(context -> setSculkedSightSensorRelay(context.getSource().getPlayer(), false))
+                    )
+                    .then(CommandManager.argument("enabled", BoolArgumentType.bool())
+                            .executes(context -> setSculkedSightSensorRelay(
                                     context.getSource().getPlayer(),
                                     BoolArgumentType.getBool(context, "enabled")
                             ))
@@ -76,24 +91,24 @@ public class Sofias_ordainment implements ModInitializer {
         });
     }
 
-    private int toggleSculkedSightShriekerRelay(ServerPlayerEntity player) {
+    private int toggleSculkedSightSensorRelay(ServerPlayerEntity player) {
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(player.getServer());
-        boolean enabled = state.isSculkedSightShriekerRelayDisabled(player.getUuid());
+        boolean enabled = state.isSculkedSightSensorRelayDisabled(player.getUuid());
 
-        return setSculkedSightShriekerRelay(player, enabled);
+        return setSculkedSightSensorRelay(player, enabled);
     }
 
-    private int setSculkedSightShriekerRelay(ServerPlayerEntity player, boolean enabled) {
+    private int setSculkedSightSensorRelay(ServerPlayerEntity player, boolean enabled) {
         if (!PowerHolderComponent.hasPower(player, Sculked_Sight.class)) {
             player.sendMessage(Text.literal("You may only use this while you have Sculked Sight."));
             return 0;
         }
 
         StateSaverAndLoader state = StateSaverAndLoader.getServerState(player.getServer());
-        state.setSculkedSightShriekerRelayDisabled(player.getUuid(), !enabled);
+        state.setSculkedSightSensorRelayDisabled(player.getUuid(), !enabled);
 
         String status = enabled ? "enabled" : "disabled";
-        Text message = Text.literal("Sculked Sight shrieker voice relay " + status + ".");
+        Text message = Text.literal("Sculked Sight sensor voice relay " + status + ".");
 
         player.sendMessage(message, false);
         return 1;
